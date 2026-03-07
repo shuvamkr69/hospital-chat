@@ -1,5 +1,4 @@
 function useSocket() {
-  // socket logic goes here
   return {};
 }
 
