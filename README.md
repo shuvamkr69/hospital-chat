@@ -13,7 +13,6 @@ A real-time hospital department communication dashboard — similar to Slack or 
 - [Available Scripts](#available-scripts)
 - [Environment Variables](#environment-variables)
 - [Architecture Notes](#architecture-notes)
-- [Contributing](#contributing)
 
 ---
 
@@ -174,16 +173,6 @@ All HTTP calls go through `src/services/api.js`. Add functions there (e.g. `getM
 ### Real-time (Socket.IO)
 
 Use `src/hooks/useSocket.js` to manage the socket connection. The server URL is read from `VITE_SOCKET_URL` in `.env`.
-
----
-
-## Contributing
-
-1. Pull the latest: `git pull origin main`
-2. Create a branch: `git checkout -b feature/your-feature-name`
-3. Make your changes and commit: `git commit -m "feat: describe your change"`
-4. Push: `git push origin feature/your-feature-name`
-5. Open a Pull Request against `main`
 
 ---
 
