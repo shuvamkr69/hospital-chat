@@ -1,7 +1,11 @@
 import './ChatHeader.css';
 
-function ChatHeader() {
-  return <div>ChatHeader</div>;
+function ChatHeader({ department }) {
+  return(
+    <div className="chat-header">
+       <h2>{department} Department</h2>
+    </div>
+  );
 }
 
 export default ChatHeader;
