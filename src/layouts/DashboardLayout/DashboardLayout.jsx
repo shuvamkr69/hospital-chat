@@ -1,39 +1,44 @@
-
-import Navbar from '../../components/Navbar/Navbar';
-import Sidebar from '../../components/Sidebar/Sidebar';
-import ChatHeader from '../../components/Chat/ChatHeader';
-import MessageList from '../../components/Chat/MessageList';
-import MessageInput from '../../components/Chat/MessageInput';
 import { useState } from "react";
 
-import './DashboardLayout.css';
+import Sidebar from "../../components/Sidebar/Sidebar";
+import ChatHeader from "../../components/chat/ChatHeader";
+import ChatArea from "../../components/chat/ChatArea";
+import MessageInput from "../../components/chat/MessageInput";
+
+import "./DashboardLayout.css";
 
 function DashboardLayout() {
 
-  const[messages, setMessage] = useState([]);
+  const [messages, setMessages] = useState([]);
   const [department, setDepartment] = useState("ICU");
 
   return (
-     <div className="dashboard">
+    <div className="dashboard">
 
-      <Navbar />
+      <Navbar
+        department={department}
+        setDepartment={setDepartment}
+      />
 
       <div className="dashboard-body">
 
-       <Sidebar setDepartment={setDepartment} />
+        <Sidebar />
 
         <div className="chat-container">
+
           <ChatHeader department={department} />
 
-          <MessageList messages={messages} />
+          <ChatArea messages={messages} />
 
           <MessageInput
-          messages={messages}
-          setMessages={setMessage}
-          
+            messages={messages}
+            setMessages={setMessages}
           />
+
         </div>
+
       </div>
+
     </div>
   );
 }
