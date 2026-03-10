@@ -1,24 +1,48 @@
-import { useContext } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
-import LoginPage from '../pages/Login/LoginPage';
-import DashboardPage from '../pages/Dashboard/DashboardPage';
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import LoginPage from "../pages/Login/LoginPage";
+import Dashboard from "../pages/Dashboard/DashboardPage";
 
-function AppRoutes() {
-  const { user } = useContext(AuthContext);
-
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route
-          path="/"
-          element={user ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />}
-        />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-      </Routes>
-    </BrowserRouter>
-  );
+function ProtectedRoute({ children }) {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" replace />;
+  return children;
 }
 
-export default AppRoutes;
+function PublicRoute({ children }) {
+  const { user } = useAuth();
+  if (user) return <Navigate to="/dashboard" replace />;
+  return children;
+}
+
+export default function AppRoutes() {
+  return (
+    <Routes>
+      {/* Root redirect */}
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+      {/* Public */}
+      <Route
+        path="/login"
+        element={
+          <PublicRoute>
+            <LoginPage />
+          </PublicRoute>
+        }
+      />
+
+      {/* Protected */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* 404 fallback */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}

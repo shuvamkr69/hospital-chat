@@ -1,13 +1,17 @@
-import { createContext } from 'react';
+import { createContext, useContext, useRef } from "react";
 
-export const SocketContext = createContext(null);
+const SocketContext = createContext(null);
 
-function SocketProvider({ children }) {
+export function SocketProvider({ children }) {
+  const socketRef = useRef(null);
+
   return (
-    <SocketContext.Provider value={{}}>
+    <SocketContext.Provider value={socketRef}>
       {children}
     </SocketContext.Provider>
   );
 }
 
-export default SocketProvider;
+export function useSocketContext() {
+  return useContext(SocketContext);
+}

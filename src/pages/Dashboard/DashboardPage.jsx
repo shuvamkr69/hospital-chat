@@ -1,8 +1,5 @@
-import './DashboardPage.css';
-import DashboardLayout from '../../layouts/DashboardLayout/DashboardLayout';
+import DashboardLayout from "../../layouts/DashboardLayout/DashboardLayout";
 
-function DashboardPage() {
+export default function Dashboard() {
   return <DashboardLayout />;
 }
-
-export default DashboardPage;
