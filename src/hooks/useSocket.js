@@ -40,6 +40,7 @@ export function useSocket(department, onMessage) {
   }, [department, socketRef]);
 
   const sendMessage = (payload) => {
+    
     socketRef.current?.emit("send_message", payload);
   };
 
