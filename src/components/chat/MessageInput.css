@@ -1,1 +1,89 @@
-/* MessageInput styles */
+.message-input-bar {
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.message-input-inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--color-bg);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.message-input-inner:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.message-input-attach {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-tertiary);
+  background: transparent;
+  border-radius: var(--radius-full);
+  transition: color var(--transition-fast), background var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.message-input-attach:hover {
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.message-input-field {
+  flex: 1;
+  background: transparent;
+  border: none;
+  font-size: var(--text-base);
+  color: var(--color-text-primary);
+  resize: none;
+  line-height: 1.5;
+  max-height: 120px;
+  padding: 6px 0;
+}
+
+.message-input-field::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.message-send-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-4);
+  height: 36px;
+  background: var(--color-primary);
+  color: white;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  border-radius: var(--radius-xl);
+  transition: background var(--transition-fast), transform var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.message-send-btn:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.message-send-btn:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.message-send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.message-send-btn svg {
+  width: 14px;
+  height: 14px;
+}

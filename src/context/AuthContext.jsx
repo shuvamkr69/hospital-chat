@@ -1,15 +1,31 @@
-import { createContext, useState } from 'react';
+import { createContext, useContext, useState } from "react";
 
-export const AuthContext = createContext(null);
+const AuthContext = createContext(null);
 
-function AuthProvider({ children }) {
+export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
+  const login = (userData) => {
+    setUser(userData);
+    localStorage.setItem("hc_user", JSON.stringify(userData));
+  };
+
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem("hc_user");
+  };
+
+  // Restore session on mount
+  const storedUser = localStorage.getItem("hc_user");
+  const initialUser = user ?? (storedUser ? JSON.parse(storedUser) : null);
+
   return (
-    <AuthContext.Provider value={{ user, setUser }}>
+    <AuthContext.Provider value={{ user: initialUser, setUser, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-export default AuthProvider;
+export function useAuth() {
+  return useContext(AuthContext);
+}
