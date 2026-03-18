@@ -59,3 +59,48 @@
     opacity: 0.6;
   }
 }
+
+/* Mobile responsive - hide sidebar on screens < 768px */
+@media (max-width: 768px) {
+  .dashboard-body {
+    flex-direction: column;
+  }
+
+  .chat-container {
+    width: 100%;
+    flex: 1;
+  }
+
+  /* Sidebar should be hidden by default on mobile */
+  .sidebar {
+    display: none;
+  }
+
+  /* Show sidebar when needed */
+  .sidebar.mobile-open {
+    display: flex;
+    position: absolute;
+    left: 0;
+    top: 75px;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    max-height: calc(100vh - 75px);
+  }
+}
+
+/* Tablet responsive - 769px - 1024px */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .sidebar {
+    width: 280px;
+    min-width: 280px;
+  }
+}
+
+/* Desktop responsive - 1025px+ */
+@media (min-width: 1025px) {
+  .sidebar {
+    width: 320px;
+    min-width: 320px;
+  }
+}

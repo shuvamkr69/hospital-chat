@@ -87,3 +87,66 @@
   width: 14px;
   height: 14px;
 }
+
+/* Mobile responsive - screens < 768px */
+@media (max-width: 768px) {
+  .message-input-bar {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .message-input-inner {
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-2);
+    border-radius: var(--radius-lg);
+  }
+
+  .message-input-attach {
+    width: 32px;
+    height: 32px;
+  }
+
+  .message-input-field {
+    font-size: 14px;
+    padding: 4px 0;
+  }
+
+  .message-send-btn {
+    padding: 0 var(--space-2);
+    height: 34px;
+    font-size: var(--text-xs);
+    gap: var(--space-1);
+  }
+
+  .message-send-btn svg {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+/* Tablet responsive - 769px - 1024px */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .message-input-bar {
+    padding: var(--space-3) var(--space-3);
+  }
+
+  .message-input-inner {
+    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+  }
+
+  .message-send-btn {
+    padding: 0 var(--space-3);
+    height: 35px;
+  }
+}
+
+/* Large screens - 1025px+ */
+@media (min-width: 1025px) {
+  .message-input-bar {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .message-send-btn {
+    padding: 0 var(--space-4);
+    height: 36px;
+  }
+}

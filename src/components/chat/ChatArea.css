@@ -191,3 +191,82 @@
   font-size: var(--text-sm);
   color: var(--color-text-tertiary);
 }
+
+/* Mobile responsive - screens < 768px */
+@media (max-width: 768px) {
+  .chat-area {
+    padding: var(--space-3);
+    gap: var(--space-3);
+  }
+
+  .message-sender-row {
+    gap: var(--space-1);
+    padding: 0;
+  }
+
+  .message-sender-avatar {
+    width: 24px;
+    height: 24px;
+    font-size: 10px;
+  }
+
+  .message-group {
+    gap: var(--space-1);
+  }
+
+  .chat-date-divider {
+    gap: var(--space-2);
+    margin: var(--space-2) 0;
+  }
+
+  .chat-date-divider span {
+    font-size: var(--text-xs);
+    padding: 0 var(--space-1);
+  }
+
+  .message-content {
+    max-width: calc(100vw - 60px);
+  }
+
+  .message-box {
+    max-width: calc(100vw - 60px);
+    word-wrap: break-word;
+  }
+}
+
+/* Tablet responsive - 769px - 1024px */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .chat-area {
+    padding: var(--space-4);
+    gap: var(--space-3);
+  }
+
+  .message-sender-avatar {
+    width: 28px;
+    height: 28px;
+  }
+
+  .message-group {
+    gap: var(--space-1);
+  }
+
+  .message-content {
+    max-width: calc(100vw - 340px);
+  }
+}
+
+/* Large screens - 1025px+ */
+@media (min-width: 1025px) {
+  .chat-area {
+    padding: var(--space-5);
+  }
+
+  .message-sender-avatar {
+    width: 28px;
+    height: 28px;
+  }
+
+  .message-content {
+    max-width: 600px;
+  }
+}

@@ -14,7 +14,7 @@ export function AuthProvider({ children }) {
     }
   });
 
-  const login = (userData) => {
+  const login = (userData, accessToken) => {
     // ✅ Normalize backend shape (_id, fullName) → consistent shape
     const normalized = {
       id: userData._id,
@@ -24,6 +24,11 @@ export function AuthProvider({ children }) {
     };
     setUser(normalized);
     localStorage.setItem("hc_user", JSON.stringify(normalized));
+    
+    // ✅ Store access token for Authorization header
+    if (accessToken) {
+      localStorage.setItem("accessToken", accessToken);
+    }
   };
 
   const logout = async () => {
@@ -35,6 +40,7 @@ export function AuthProvider({ children }) {
     } finally {
       setUser(null);
       localStorage.removeItem("hc_user");
+      localStorage.removeItem("accessToken");
     }
   };
 

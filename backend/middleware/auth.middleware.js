@@ -3,7 +3,13 @@ import { User } from "../models/user.model.js";
 
 export const protectRoute = async (req, res, next) => {
   try {
-    const token = req.cookies.jwt;
+    // Try to get token from Authorization header first (preferred method)
+    let token = req.headers.authorization?.split(" ")[1];
+
+    // Fallback to cookie (old jwt for backward compatibility)
+    if (!token) {
+      token = req.cookies.jwt;
+    }
 
     if (!token) {
       return res
@@ -11,7 +17,20 @@ export const protectRoute = async (req, res, next) => {
         .json({ message: "Unauthorized - No Token Provided" });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // Verify access token
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (error) {
+      // If access token expired, check if client should refresh
+      if (error.name === "TokenExpiredError") {
+        return res.status(401).json({
+          message: "Access token expired",
+          code: "TOKEN_EXPIRED",
+        });
+      }
+      throw error;
+    }
 
     if (!decoded) {
       return res.status(401).json({ message: "Unauthorized - Invalid Token" });
@@ -28,6 +47,6 @@ export const protectRoute = async (req, res, next) => {
     next();
   } catch (error) {
     console.log("Error in protectRoute middleware: ", error.message);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(401).json({ message: "Invalid token" });
   }
 };

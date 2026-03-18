@@ -43,7 +43,8 @@ export default function LoginPage() {
 
     try {
       const { data } = await authApi.login(email, password);
-      login(data);
+      // data now contains { accessToken, user { _id, fullName, email, profilePic } }
+      login(data.user, data.accessToken);
       navigate("/dashboard");
     } catch (err) {
       const msg = err.response?.data?.message || "Invalid credentials. Please try again.";

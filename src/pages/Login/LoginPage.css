@@ -20,6 +20,44 @@
   animation: slideUp 0.4s ease;
 }
 
+/* Mobile responsive - small screens (< 480px) */
+@media (max-width: 480px) {
+  .login-page {
+    padding: var(--space-3);
+  }
+
+  .login-card {
+    max-width: 100%;
+    padding: var(--space-6);
+    border-radius: var(--radius-lg);
+  }
+
+  .login-title {
+    font-size: var(--text-lg);
+  }
+
+  .login-subtitle {
+    font-size: var(--text-xs);
+  }
+
+  .form-input {
+    height: 40px;
+    font-size: 16px; /* Prevents auto-zoom on iOS */
+  }
+}
+
+/* Tablet responsive - medium screens (481px - 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+  .login-page {
+    padding: var(--space-4);
+  }
+
+  .login-card {
+    max-width: 450px;
+    padding: var(--space-7);
+  }
+}
+
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }

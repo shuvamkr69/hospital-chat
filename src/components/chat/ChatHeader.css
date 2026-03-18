@@ -37,3 +37,44 @@
   background: var(--color-success);
   display: inline-block;
 }
+
+/* Mobile responsive - screens < 768px */
+@media (max-width: 768px) {
+  .chat-header {
+    height: 52px;
+    padding: 0 var(--space-3);
+  }
+
+  .chat-header-title {
+    font-size: var(--text-base);
+  }
+
+  .chat-header-meta {
+    font-size: var(--text-xs);
+    gap: var(--space-1);
+  }
+
+  .chat-header-info {
+    gap: 1px;
+  }
+}
+
+/* Tablet responsive - 769px - 1024px */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .chat-header {
+    height: 54px;
+    padding: 0 var(--space-4);
+  }
+
+  .chat-header-title {
+    font-size: var(--text-md);
+  }
+}
+
+/* Large screens - 1025px+ */
+@media (min-width: 1025px) {
+  .chat-header {
+    height: 56px;
+    padding: 0 var(--space-5);
+  }
+}
