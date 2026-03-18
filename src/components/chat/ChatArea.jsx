@@ -2,8 +2,29 @@ import { useEffect, useRef } from "react";
 import { useAuth } from "../../context/AuthContext";
 import "./ChatArea.css";
 
-function getInitials(name = "") {
-  return name.split(" ").slice(0, 2).map(n => n[0]).join("");
+function getAvatar(sender) {
+  // Priority: senderProfilePic (from user's stored profile)
+  if (sender?.senderProfilePic) return sender.senderProfilePic;
+  // Check message image field
+  if (sender?.image) return sender.image;
+  // Check profile picture fields
+  if (sender?.profilePic) return sender.profilePic;
+  // Fallback to avatar API endpoint
+  if (sender?.senderId) return `/auth/avatar/${sender.senderId}`;
+  return "";
+}
+
+function getSenderName(sender) {
+  return sender?.senderName || sender?.name || "Unknown sender";
+}
+
+function getInitials(name) {
+  return name
+    .split(" ")
+    .slice(0, 2)
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase();
 }
 
 function formatTime(ts) {
@@ -12,14 +33,36 @@ function formatTime(ts) {
 }
 
 function MessageBubble({ message, isSent }) {
+  const avatarSrc = getAvatar(message);
+  const senderName = getSenderName(message);
+  const initials = getInitials(senderName);
+
   return (
     <div className={`message-group ${isSent ? "sent" : "received"}`}>
       {!isSent && (
         <div className="message-sender-row">
           <div className="message-sender-avatar">
-            {getInitials(message.senderName)}
+            {avatarSrc && (
+              <img
+                src={avatarSrc}
+                alt={senderName}
+                title={senderName}
+                className="message-avatar"
+                onError={(e) => {
+                  e.currentTarget.classList.add("hidden");
+                }}
+              />
+            )}
+            <div 
+              className="message-avatar-initials"
+              style={{
+                display: avatarSrc && !avatarSrc.includes("undefined") ? "none" : "flex"
+              }}
+            >
+              {initials}
+            </div>
           </div>
-          <span className="message-sender-name">{message.senderName}</span>
+          <span className="message-sender-name">{senderName}</span>
         </div>
       )}
       <div className="message-bubble">{message.text}</div>
@@ -34,6 +77,14 @@ export default function ChatArea({ messages }) {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // Debug: log first message structure
+  useEffect(() => {
+    if (messages.length > 0) {
+      console.log("🔍 First message structure:", messages[0]);
+      console.log("🔍 All messages:", messages);
+    }
   }, [messages]);
 
   if (!messages.length) {

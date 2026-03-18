@@ -118,15 +118,6 @@ export default function LoginPage() {
             {loading ? <span className="login-btn-spinner" /> : null}
             {loading ? "Signing in…" : "Sign In"}
           </button>
-
-          <button
-            type="button"
-            className="login-btn"
-            style={{ background: "var(--color-surface-alt)", color: "var(--color-text-primary)", marginTop: 0 }}
-            onClick={handleDemoLogin}
-          >
-            Continue with Demo Account
-          </button>
         </form>
 
         <div className="login-footer">

@@ -1,33 +1,47 @@
 import { useState, useEffect, useCallback } from "react";
 import Navbar from "../../components/Navbar/Navbar";
 import Sidebar from "../../components/Sidebar/Sidebar";
-import ChatHeader from "../../components/chat/ChatHeader";
-import ChatArea from "../../components/chat/ChatArea";
-import MessageInput from "../../components/chat/MessageInput";
+import ChatHeader from "../../components/Chat/ChatHeader";
+import ChatArea from "../../components/Chat/ChatArea";
+import MessageInput from "../../components/Chat/MessageInput";
 import { useAuth } from "../../context/AuthContext";
 import { useSocket } from "../../hooks/useSocket";
 import { messagesApi } from "../../services/api";
 import "./DashboardLayout.css";
 
-// Demo seed messages per department
+// Demo fallback messages per department (used when backend is unreachable)
 const DEMO_MESSAGES = {
   ICU: [
-    { id: "1", senderId: "1", senderName: "Dr. Sarah Jenkins", text: "Has anyone checked the latest labs for room 402?", timestamp: new Date(Date.now() - 20 * 60000).toISOString() },
-    { id: "2", senderId: "demo-001", senderName: "You", text: "Yes, just came in. Glucose levels are stable.", timestamp: new Date(Date.now() - 18 * 60000).toISOString() },
-    { id: "3", senderId: "2", senderName: "Dr. Michael Chen", text: "Great, I will update the chart now. Thanks!", timestamp: new Date(Date.now() - 16 * 60000).toISOString() },
+    { id: "d1", senderId: "u1", senderName: "Dr. Sarah Jenkins", text: "Has anyone checked the latest labs for room 402?", timestamp: new Date(Date.now() - 20 * 60000).toISOString() },
+    { id: "d2", senderId: "u2", senderName: "Dr. Michael Chen", text: "Yes, Glucose levels are stable. I'll update the chart.", timestamp: new Date(Date.now() - 16 * 60000).toISOString() },
   ],
   Lab: [
-    { id: "4", senderId: "5", senderName: "Dr. Lisa Park", text: "CBC results for patients in ICU are ready.", timestamp: new Date(Date.now() - 30 * 60000).toISOString() },
-    { id: "5", senderId: "6", senderName: "Tech. Ryan Gomez", text: "Blood culture samples received. Processing now.", timestamp: new Date(Date.now() - 10 * 60000).toISOString() },
+    { id: "d3", senderId: "u3", senderName: "Dr. Lisa Park", text: "CBC results for ICU patients are ready.", timestamp: new Date(Date.now() - 30 * 60000).toISOString() },
+    { id: "d4", senderId: "u4", senderName: "Tech. Ryan Gomez", text: "Blood culture samples received. Processing now.", timestamp: new Date(Date.now() - 10 * 60000).toISOString() },
   ],
   Pharmacy: [
-    { id: "6", senderId: "7", senderName: "PharmD. Anna Wu", text: "Warfarin order for room 308 — please confirm dose.", timestamp: new Date(Date.now() - 45 * 60000).toISOString() },
+    { id: "d5", senderId: "u5", senderName: "PharmD. Anna Wu", text: "Warfarin order for room 308 — please confirm dose.", timestamp: new Date(Date.now() - 45 * 60000).toISOString() },
   ],
   Emergency: [
-    { id: "7", senderId: "9", senderName: "Dr. James Okafor", text: "Incoming trauma in 10 minutes. Team to bay 3.", timestamp: new Date(Date.now() - 5 * 60000).toISOString() },
-    { id: "8", senderId: "10", senderName: "Nurse Priya Patel", text: "Bay 3 is ready. IV lines prepared.", timestamp: new Date(Date.now() - 3 * 60000).toISOString() },
+    { id: "d6", senderId: "u6", senderName: "Dr. James Okafor", text: "Incoming trauma in 10 minutes. Team to bay 3.", timestamp: new Date(Date.now() - 5 * 60000).toISOString() },
+    { id: "d7", senderId: "u7", senderName: "Nurse Priya Patel", text: "Bay 3 is ready. IV lines prepared.", timestamp: new Date(Date.now() - 3 * 60000).toISOString() },
   ],
 };
+
+// Normalize a message from the API to a consistent shape
+function normalizeMessage(msg) {
+  return {
+    id: msg._id || msg.id,
+    senderId: msg.senderId?.toString?.() || msg.senderId,
+    senderName: msg.senderName,
+    senderProfilePic: msg.senderProfilePic,
+    text: msg.text,
+    image: msg.image,
+    department: msg.department,
+    // ✅ API returns createdAt; socket sends timestamp
+    timestamp: msg.createdAt || msg.timestamp,
+  };
+}
 
 export default function DashboardLayout() {
   const { user } = useAuth();
@@ -38,12 +52,13 @@ export default function DashboardLayout() {
   // Load messages when department changes
   useEffect(() => {
     setLoading(true);
+    setMessages([]); // clear while loading
     const load = async () => {
       try {
         const { data } = await messagesApi.getByDepartment(department);
-        setMessages(data);
+        setMessages(data.map(normalizeMessage));
       } catch {
-        // Fall back to demo data
+        // Fallback to demo data if backend unreachable
         setMessages(DEMO_MESSAGES[department] || []);
       } finally {
         setLoading(false);
@@ -52,34 +67,47 @@ export default function DashboardLayout() {
     load();
   }, [department]);
 
-  // Socket: receive incoming messages
+  // Socket: receive incoming messages in real-time
   const handleIncoming = useCallback((msg) => {
-    setMessages((prev) => [...prev, msg]);
+    setMessages((prev) => {
+      // Deduplicate: if we already have this message (from optimistic update), skip
+      const normalized = normalizeMessage(msg);
+      const exists = prev.some(
+        (m) => m.id === normalized.id ||
+               (m.id?.startsWith?.("local-") && m.text === normalized.text && m.senderId === normalized.senderId)
+      );
+      if (exists) return prev;
+      return [...prev, normalized];
+    });
   }, []);
 
   const { sendMessage } = useSocket(department, handleIncoming);
 
   const handleSend = async (text) => {
+    if (!text.trim()) return;
+
+    const optimisticId = `local-${Date.now()}`;
     const msg = {
-      id: `local-${Date.now()}`,
-      senderId: user?.id,
-      senderName: user?.name,
+      id: optimisticId,
+      senderId: user?.id,       // ✅ normalized shape from AuthContext
+      senderName: user?.name,   // ✅ normalized shape from AuthContext
       text,
       department,
       timestamp: new Date().toISOString(),
     };
 
-    // Optimistic update
+    // Optimistic UI update
     setMessages((prev) => [...prev, msg]);
 
-    // Emit via socket
+    // Emit via socket (broadcasts to other users in the room)
     sendMessage(msg);
 
-    // Also persist via REST
+    // Persist via REST API
     try {
-      await messagesApi.send(msg);
-    } catch {
-      // Message already shown optimistically; handle retry logic here if needed
+      await messagesApi.send({ text, department });
+    } catch (err) {
+      console.error("Failed to persist message:", err.message);
+      // Message already shown; could add retry/error indicator here
     }
   };
 
@@ -92,10 +120,11 @@ export default function DashboardLayout() {
 
         <div className="chat-container">
           <ChatHeader department={department} />
-          {loading
-            ? <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--color-text-tertiary)", fontSize: "var(--text-sm)" }}>Loading messages…</div>
-            : <ChatArea messages={messages} />
-          }
+          {loading ? (
+            <div className="chat-loading">Loading messages…</div>
+          ) : (
+            <ChatArea messages={messages} />
+          )}
           <MessageInput onSend={handleSend} />
         </div>
       </div>

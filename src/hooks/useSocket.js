@@ -1,11 +1,14 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { io } from "socket.io-client";
 import { useSocketContext } from "../context/SocketContext";
+import { useAuth } from "../context/AuthContext";
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
 
 export function useSocket(department, onMessage) {
-  const socketRef = useSocketContext();
+  const { socketRef, setDepartmentCounts, setDepartmentMembers } =
+    useSocketContext();
+  const { user } = useAuth();
   const onMessageRef = useRef(onMessage);
   onMessageRef.current = onMessage;
 
@@ -16,6 +19,10 @@ export function useSocket(department, onMessage) {
       transports: ["websocket"],
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
+      withCredentials: true,
+      query: {
+        userId: user?.id || "",
+      },
     });
 
     socketRef.current = socket;
@@ -24,12 +31,17 @@ export function useSocket(department, onMessage) {
       socket.emit("join_department", department);
     });
 
-    socket.on("receive_message", (message) => {
-      onMessageRef.current?.(message);
+    socket.on("departmentOnline", (counts) => {
+      setDepartmentCounts?.(counts || {});
     });
 
-    socket.on("disconnect", () => {
-      console.log("Socket disconnected");
+    // ✅ NEW: listen for members
+    socket.on("departmentMembers", (members) => {
+      setDepartmentMembers?.(members || {});
+    });
+
+    socket.on("receive_message", (message) => {
+      onMessageRef.current?.(message);
     });
 
     return () => {
@@ -37,12 +49,14 @@ export function useSocket(department, onMessage) {
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [department, socketRef]);
+  }, [department, user?.id]);
 
-  const sendMessage = (payload) => {
-    
-    socketRef.current?.emit("send_message", payload);
-  };
+  const sendMessage = useCallback(
+    (payload) => {
+      socketRef.current?.emit("send_message", payload);
+    },
+    [socketRef],
+  );
 
   return { sendMessage };
 }

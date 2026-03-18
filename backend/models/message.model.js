@@ -7,10 +7,15 @@ const messageSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    receiverId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+    senderName: {
+      type: String,
       required: true,
+    },
+    // ✅ Department field for channel-based messaging (ICU, Lab, Pharmacy, Emergency)
+    department: {
+      type: String,
+      required: true,
+      enum: ["ICU", "Lab", "Pharmacy", "Emergency"],
     },
     text: {
       type: String,
@@ -21,6 +26,9 @@ const messageSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Index for fast department-based queries
+messageSchema.index({ department: 1, createdAt: 1 });
 
 const Message = mongoose.model("Message", messageSchema);
 

@@ -1,28 +1,6 @@
-import { useEffect, useState } from "react";
-import { staffApi } from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
+import { useSocketContext } from "../../context/SocketContext";
 import "./Sidebar.css";
-
-const DEMO_STAFF = {
-  ICU: [
-    { id: "1", name: "Dr. Sarah Jenkins", role: "Doctor", online: true },
-    { id: "2", name: "Dr. Michael Chen",  role: "Doctor", online: true },
-    { id: "3", name: "Nurse Emily Davis", role: "Nurse",  online: false },
-    { id: "4", name: "Nurse David Kim",   role: "Nurse",  online: true },
-  ],
-  Lab: [
-    { id: "5", name: "Dr. Lisa Park",     role: "Pathologist", online: true },
-    { id: "6", name: "Tech. Ryan Gomez",  role: "Lab Tech",    online: false },
-  ],
-  Pharmacy: [
-    { id: "7", name: "PharmD. Anna Wu",   role: "Pharmacist",  online: true },
-    { id: "8", name: "PharmD. Carlos R.", role: "Pharmacist",  online: true },
-  ],
-  Emergency: [
-    { id: "9",  name: "Dr. James Okafor", role: "ER Doctor",  online: true },
-    { id: "10", name: "Nurse Priya Patel",role: "ER Nurse",   online: true },
-    { id: "11", name: "Dr. Fatima Al-H.", role: "ER Doctor",  online: false },
-  ],
-};
 
 function getInitials(name) {
   return name.split(" ").slice(0, 2).map(n => n[0]).join("");
@@ -35,42 +13,53 @@ function AvatarColors(name) {
 }
 
 export default function Sidebar({ department }) {
-  const [staff, setStaff] = useState([]);
+  const { departmentMembers } = useSocketContext();
+  const { user } = useAuth();
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const { data } = await staffApi.getByDepartment(department);
-        setStaff(data);
-      } catch {
-        setStaff(DEMO_STAFF[department] || []);
-      }
-    };
-    if (department) load();
-  }, [department]);
+  const members = departmentMembers?.[department] || [];
+
+  // ✅ Sort: Me first
+  const sortedMembers = [...members].sort((a, b) => {
+    if (a.id === user?.id) return -1;
+    if (b.id === user?.id) return 1;
+    return 0;
+  });
 
   return (
     <aside className="sidebar">
-      <div className="sidebar-section-title">Staff</div>
+      <div className="sidebar-section-title">Online Staff</div>
+
       <div className="sidebar-staff-list">
-        {staff.map((member) => (
-          <div key={member.id} className="sidebar-staff-item">
-            <div
-              className="staff-avatar"
-              style={{ background: AvatarColors(member.name) }}
-            >
-              {member.avatar
-                ? <img src={member.avatar} alt={member.name} />
-                : <span style={{ color: "#374151" }}>{getInitials(member.name)}</span>
-              }
-              {member.online && <span className="staff-online-dot" />}
+        {sortedMembers.map((member) => {
+          const isMe = member.id === user?.id;
+
+          return (
+            <div key={member.id} className="sidebar-staff-item">
+              <div
+                className="staff-avatar"
+                style={{ background: AvatarColors(member.name) }}
+              >
+                {member.profilePic ? (
+                  <img src={member.profilePic} alt={member.name} />
+                ) : (
+                  <span style={{ color: "#374151" }}>
+                    {getInitials(member.name)}
+                  </span>
+                )}
+                <span className="staff-online-dot" />
+              </div>
+
+              <div className="staff-info">
+                <div className="staff-name">
+                  {member.name} {isMe ? "(Me)" : ""}
+                </div>
+                <div className="staff-role">
+                  Online
+                </div>
+              </div>
             </div>
-            <div className="staff-info">
-              <div className="staff-name">{member.name}</div>
-              <div className="staff-role">{member.role}</div>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </aside>
   );
