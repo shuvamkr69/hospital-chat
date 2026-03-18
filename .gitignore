@@ -24,3 +24,5 @@ dist-ssr
 *.sw?
 
 documentation
+backend/.env
+backend/seeds/seeded-users-tokens.json
