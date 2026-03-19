@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import Navbar from "../../components/Navbar/Navbar";
 import Sidebar from "../../components/Sidebar/Sidebar";
-import ChatHeader from "../../components/Chat/ChatHeader";
-import ChatArea from "../../components/Chat/ChatArea";
-import MessageInput from "../../components/Chat/MessageInput";
+import ChatHeader from "../../components/chat/ChatHeader";
+import ChatArea from "../../components/chat/ChatArea";
+import MessageInput from "../../components/chat/MessageInput";
 import { useAuth } from "../../context/AuthContext";
 import { useSocket } from "../../hooks/useSocket";
 import { messagesApi } from "../../services/api";
