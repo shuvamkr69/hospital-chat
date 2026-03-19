@@ -16,12 +16,38 @@ const __dirname = path.resolve();
 
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    credentials: true, // ✅ required for cookie-based JWT
-  })
-);
+
+// ✅ Enhanced CORS configuration for development and production
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow all origins in development, or check against whitelist in production
+    const allowedOrigins = [
+      "http://localhost:5173",
+      "http://localhost:3000",
+      "http://127.0.0.1:5173",
+      "http://127.0.0.1:3000",
+      process.env.CORS_ORIGIN,
+    ].filter(Boolean);
+
+    // If no origin (e.g., mobile app or same-origin requests), allow it
+    if (
+      !origin ||
+      allowedOrigins.includes(origin) ||
+      process.env.CORS_ORIGIN === "*"
+    ) {
+      callback(null, true);
+    } else {
+      console.warn(`CORS blocked origin: ${origin}`);
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true, // ✅ required for cookies (refresh token)
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  maxAge: 86400, // 24 hours
+};
+
+app.use(cors(corsOptions));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
